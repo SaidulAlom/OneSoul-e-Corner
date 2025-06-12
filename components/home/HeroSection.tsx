@@ -1,169 +1,106 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
-import {
-  ArrowRight,
-  Newspaper,
-  Briefcase,
-  Video,
-  BookOpen,
-  Settings,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, BookOpen, Briefcase, Newspaper, Video } from "lucide-react";
+
+const features = [
+  {
+    icon: <Newspaper className="h-6 w-6" />,
+    title: "Latest News",
+    description: "Stay updated with the latest news and events from around the world.",
+  },
+  {
+    icon: <Briefcase className="h-6 w-6" />,
+    title: "Job Opportunities",
+    description: "Find your dream job with our comprehensive job listings.",
+  },
+  {
+    icon: <Video className="h-6 w-6" />,
+    title: "Educational Vlogs",
+    description: "Learn from our expert-led video content and tutorials.",
+  },
+  {
+    icon: <BookOpen className="h-6 w-6" />,
+    title: "E-Books",
+    description: "Access a vast collection of digital books and resources.",
+  },
+];
 
 const HeroSection = () => {
-  const features = [
-    {
-      icon: Newspaper,
-      title: "Latest News",
-      description: "Stay updated with current affairs",
-      href: "/news",
-    },
-    {
-      icon: Briefcase,
-      title: "Job Opportunities",
-      description: "Find your dream job",
-      href: "/jobs",
-    },
-    {
-      icon: Video,
-      title: "Educational Vlogs",
-      description: "Learn from experts",
-      href: "/vlogs",
-    },
-    {
-      icon: BookOpen,
-      title: "E-Books",
-      description: "Digital learning resources",
-      href: "/ebooks",
-    },
-    {
-      icon: Settings,
-      title: "Digital Services",
-      description: "Government & private services",
-      href: "/services",
-    },
-  ];
-
-  // Background animation variants
-  const bgVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: { duration: 1.5, ease: "easeOut" },
-    },
-  };
-
-  // CTA button animation loop
-  const ctaVariants = {
-    animate: {
-      y: [0, -10, 0],
-      transition: {
-        y: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 2,
-          ease: "easeInOut",
-        },
-      },
-    },
-  };
-
   return (
-    <section className="relative bg-gradient-to-br from-[#240750] via-[#344C64] to-[#577B8D] text-white py-24 overflow-hidden">
-      {/* Background Decorative Elements */}
-      <motion.div
-        className="absolute inset-0 bg-[url('/bg-pattern.png')] bg-cover opacity-10"
-        variants={bgVariants}
-        initial="initial"
-        animate="animate"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#240750]/50 to-transparent" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6"
-          >
-            Discover{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#57A6A1] to-[#577B8D]">
-              OneSoul e Corner
-            </span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="text-lg sm:text-xl lg:text-2xl mb-10 text-[#57A6A1] leading-relaxed"
-          >
-            Your ultimate hub for news, jobs, vlogs, e-books, and digital services
-            tailored for you.
-          </motion.p>
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#F5F5F5] to-white py-20">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left Column - Text Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-8"
           >
-            <Link href="/news">
-              <motion.button
-                variants={ctaVariants}
-                animate="animate"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-[#57A6A1] text-white font-semibold text-sm sm:text-base hover:bg-[#577B8D] focus:outline-none focus:ring-2 focus:ring-[#57A6A1] transition-colors duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#424242] leading-tight">
+              Your Gateway to{" "}
+              <span className="text-[#229799]">Knowledge</span> and{" "}
+              <span className="text-[#48CFCB]">Opportunities</span>
+            </h1>
+            <p className="text-lg text-[#424242]/80">
+              Discover a world of possibilities with OneSoul. From news and jobs to
+              educational content and digital services, we've got you covered.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                size="lg"
+                className="bg-[#229799] hover:bg-[#48CFCB] text-white"
               >
-                Explore News <ArrowRight className="ml-2 h-5 w-5" />
-              </motion.button>
-            </Link>
-            <Link href="/jobs">
-              <motion.button
-                className="inline-flex items-center px-6 py-3 rounded-lg border-2 border-[#57A6A1] text-[#57A6A1] font-semibold text-sm sm:text-base hover:bg-[#57A6A1] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#57A6A1] transition-colors duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-[#424242] text-[#424242] hover:bg-[#424242] hover:text-white"
               >
-                Find Jobs <ArrowRight className="ml-2 h-5 w-5" />
-              </motion.button>
-            </Link>
+                Learn More
+              </Button>
+            </div>
           </motion.div>
-        </div>
 
-        {/* Features Grid */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-12"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-        >
-          {features.map((feature, index) => (
-            <Link href={feature.href} key={feature.title}>
+          {/* Right Column - Features Grid */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          >
+            {features.map((feature, index) => (
               <motion.div
-                initial={{ opacity: 0, y: 50 }}
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.5,
-                  delay: 0.6 + index * 0.1,
-                  ease: "easeOut",
-                }}
-                className="relative bg-[#344C64]/80 backdrop-blur-md rounded-xl p-6 border border-[#577B8D] hover:bg-[#344C64] hover:shadow-xl transition-all duration-300 cursor-pointer group"
-                whileHover={{ scale: 1.05, y: -5 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               >
-                <feature.icon className="h-10 w-10 mx-auto mb-4 text-[#57A6A1] group-hover:text-[#577B8D] transition-colors duration-300" />
-                <h3 className="text-base sm:text-lg font-semibold text-[#57A6A1] text-center mb-2">
+                <div className="text-[#229799] mb-4">{feature.icon}</div>
+                <h3 className="text-lg font-semibold text-[#424242] mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-[#577B8D] text-center">
-                  {feature.description}
-                </p>
-                <div className="absolute bottom-0 left-0 w-0 h-1 bg-[#57A6A1] group-hover:w-full transition-all duration-300" />
+                <p className="text-[#424242]/80">{feature.description}</p>
               </motion.div>
-            </Link>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </div>
+
+      {/* Background Animation */}
+      <motion.div
+        className="absolute inset-0 -z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.1 }}
+        transition={{ duration: 1 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-[#229799]/20 to-[#48CFCB]/20" />
+      </motion.div>
     </section>
   );
 };

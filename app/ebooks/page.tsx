@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { Calendar, ArrowRight, Book, Download } from "lucide-react";
+import axios from "axios";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -13,116 +17,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Search,
-  Star,
-  Download,
-  DollarSign,
-  User,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import axios from "axios";
-import { debounce } from "lodash";
 import Head from "next/head";
-import { toast } from "sonner";
 
-interface EBook {
+interface Ebook {
   _id: string;
   title: string;
   author: string;
+  description: string;
   category: string;
-  coverImage: string;
+  cover: string;
+  fileUrl: string;
   price: number;
-  rating: number;
-  downloads: number;
+  createdAt: string;
 }
 
-const EBooksPage = () => {
-  const [ebooks, setEbooks] = useState<EBook[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function EbooksPage() {
+  const [ebooks, setEbooks] = useState<Ebook[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const ITEMS_PER_PAGE = 12;
-
-  const fetchEBooks = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: ITEMS_PER_PAGE.toString(),
-      });
-      if (searchQuery) params.append("search", searchQuery);
-      if (selectedCategory !== "all") params.append("category", selectedCategory);
-
-      const res = await axios.get(`/api/ebooks?${params}`);
-      if (res.data.success) {
-        setEbooks(res.data.data || []);
-        setTotalPages(res.data.pagination?.pages || 1);
-      } else {
-        setError("Failed to fetch e-books");
-        toast.error("Failed to fetch e-books");
-      }
-    } catch (err) {
-      setError("Failed to fetch e-books");
-      toast.error("An error occurred while fetching e-books");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Debounced search handler
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      setSearchQuery(value);
-      setCurrentPage(1);
-    }, 500),
-    []
-  );
 
   useEffect(() => {
-    fetchEBooks();
-  }, [searchQuery, selectedCategory, currentPage]);
+    const fetchEbooks = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(`/api/ebooks`, {
+          params: {
+            page,
+            search: searchQuery,
+            category: selectedCategory !== "all" ? selectedCategory : undefined,
+          },
+        });
+        setEbooks(response.data.ebooks);
+        setTotalPages(response.data.totalPages);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch e-books. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15, ease: "easeOut" },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  };
-
-  // Skeleton Loader
-  const SkeletonCard = () => (
-    <Card className="animate-pulse">
-      <div className="h-64 bg-gray-200 rounded-t-lg" />
-      <CardHeader className="pb-2">
-        <div className="h-4 bg-gray-200 rounded w-1/4 mb-2" />
-        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="h-4 bg-gray-200 rounded mb-4" />
-        <div className="h-8 bg-gray-200 rounded w-full" />
-      </CardContent>
-    </Card>
-  );
+    fetchEbooks();
+  }, [page, searchQuery, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#240750] to-[#344C64] py-12">
+    <div className="min-h-screen bg-[#F5F5F5]">
       <Head>
         <title>E-Books | OneSoul e Corner</title>
         <meta
@@ -130,185 +73,147 @@ const EBooksPage = () => {
           content="Discover and purchase quality e-books for competitive exams, fiction, and learning at OneSoul e Corner."
         />
       </Head>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-[#57A6A1] mb-4">
-            E-Book Store
-          </h1>
-          <p className="text-lg sm:text-xl text-[#577B8D] max-w-2xl mx-auto">
-            Explore our curated collection of e-books for learning and inspiration.
-          </p>
-        </motion.div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#424242] mb-2">E-Books Library</h1>
+          <p className="text-[#424242]/80">Discover our collection of digital books</p>
+        </div>
 
         {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="bg-[#344C64]/80 backdrop-blur-sm p-6 rounded-xl shadow-lg mb-12 border border-[#577B8D]"
-        >
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#577B8D] h-5 w-5" />
-              <Input
-                type="text"
-                placeholder="Search by title or author..."
-                onChange={(e) => debouncedSearch(e.target.value)}
-                className="pl-10 pr-4 py-2 rounded-lg border-[#577B8D] focus:border-[#57A6A1] focus:ring-2 focus:ring-[#57A6A1] text-sm bg-[#240750]/50 text-[#577B8D] placeholder:text-[#577B8D]/50"
-              />
-            </div>
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
-              <Select
-                value={selectedCategory}
-                onValueChange={(value) => {
-                  setSelectedCategory(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full md:w-48 rounded-lg border-[#577B8D] focus:border-[#57A6A1] focus:ring-2 focus:ring-[#57A6A1] bg-[#240750]/50 text-[#577B8D]">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#344C64] border-[#577B8D] rounded-lg shadow-lg">
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="competitive">Competitive Exams</SelectItem>
-                  <SelectItem value="fiction">Fiction</SelectItem>
-                  <SelectItem value="learning">Learning</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center p-4 bg-red-100 text-red-700 rounded-lg mb-8"
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <Input
+            type="search"
+            placeholder="Search e-books..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 bg-white border-[#424242] focus:border-[#48CFCB]"
+          />
+          <Select
+            value={selectedCategory}
+            onValueChange={setSelectedCategory}
           >
+            <SelectTrigger className="w-full md:w-[200px] bg-white border-[#424242] focus:border-[#48CFCB]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="fiction">Fiction</SelectItem>
+              <SelectItem value="non-fiction">Non-Fiction</SelectItem>
+              <SelectItem value="educational">Educational</SelectItem>
+              <SelectItem value="self-help">Self-Help</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-8">
             {error}
-          </motion.div>
+          </div>
         )}
 
-        {/* E-Books Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <SkeletonCard key={i} />
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-[#424242]/10 rounded-lg animate-pulse"
+              />
             ))}
           </div>
-        ) : ebooks.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center text-[#577B8D] text-lg"
-          >
-            No e-books found. Try adjusting your filters.
-          </motion.div>
         ) : (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-          >
-            <AnimatePresence>
-              {ebooks.map((ebook) => (
-                <motion.div key={ebook._id} variants={itemVariants}>
-                  <Card className="h-full bg-[#344C64]/80 backdrop-blur-sm border border-[#577B8D] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col">
-                    <div className="relative h-64">
-                      <Image
-                        src={ebook.coverImage || "/placeholder.jpg"}
-                        alt={ebook.title}
-                        fill
-                        className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 20vw"
-                      />
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-2 right-2"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ebooks.map((ebook) => (
+              <motion.div
+                key={ebook._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="h-full bg-white hover:shadow-lg transition-shadow">
+                  <div className="relative h-64">
+                    <Image
+                      src={ebook.cover}
+                      alt={ebook.title}
+                      fill
+                      className="object-cover rounded-t-lg"
+                    />
+                  </div>
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge
+                        style={{
+                          backgroundColor:
+                            ebook.category === "fiction"
+                              ? "#229799"
+                              : ebook.category === "non-fiction"
+                              ? "#48CFCB"
+                              : "#424242",
+                        }}
                       >
-                        <Badge className="bg-[#57A6A1] text-white">
-                          {ebook.category.charAt(0).toUpperCase() + ebook.category.slice(1)}
-                        </Badge>
-                      </motion.div>
+                        {ebook.category}
+                      </Badge>
+                      <span className="text-sm text-[#424242]/60 flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        {new Date(ebook.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-[#57A6A1] transition-colors duration-300">
-                        {ebook.title}
-                      </CardTitle>
-                      <div className="flex items-center text-sm text-[#577B8D] mt-2">
-                        <User className="h-4 w-4 mr-1" />
-                        {ebook.author}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center text-[#577B8D]">
-                          <Star className="h-4 w-4 mr-1 text-[#57A6A1]" />
-                          <span>{ebook.rating.toFixed(1)}</span>
-                        </div>
-                        <div className="flex items-center text-[#577B8D]">
-                          <Download className="h-4 w-4 mr-1" />
-                          <span>{ebook.downloads}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-[#57A6A1] font-semibold">
-                          <DollarSign className="h-4 w-4 mr-1" />
-                          {ebook.price.toFixed(2)}
-                        </div>
-                        <Button className="bg-[#57A6A1] hover:bg-[#577B8D] text-white">
-                          Buy Now
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                    <CardTitle className="text-lg font-semibold text-[#424242] line-clamp-2">
+                      {ebook.title}
+                    </CardTitle>
+                    <p className="text-sm text-[#424242]/80 flex items-center">
+                      <Book className="h-4 w-4 mr-1" />
+                      {ebook.author}
+                    </p>
+                    <p className="text-sm text-[#424242]/80 line-clamp-2 mt-2">
+                      {ebook.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-lg font-semibold text-[#229799]">
+                        ${ebook.price.toFixed(2)}
+                      </span>
+                      <Button
+                        variant="outline"
+                        className="border-[#424242] text-[#424242] hover:bg-[#229799] hover:text-white hover:border-[#229799]"
+                        asChild
+                      >
+                        <Link href={`/ebooks/${ebook._id}`}>
+                          View Details <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         )}
 
         {/* Pagination */}
-        {!loading && ebooks.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex justify-center items-center gap-2 mt-12"
+        <div className="mt-8 flex justify-center">
+          <Button
+            variant="outline"
+            className="border-[#424242] text-[#424242] hover:bg-[#229799] hover:text-white hover:border-[#229799]"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
           >
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="border-[#577B8D] text-[#577B8D] hover:bg-[#57A6A1] hover:text-white"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-[#577B8D]">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="border-[#577B8D] text-[#577B8D] hover:bg-[#57A6A1] hover:text-white"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </motion.div>
-        )}
+            Previous
+          </Button>
+          <span className="mx-4 flex items-center text-[#424242]">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            className="border-[#424242] text-[#424242] hover:bg-[#229799] hover:text-white hover:border-[#229799]"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default EBooksPage;
+}

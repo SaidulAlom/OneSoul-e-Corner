@@ -2,73 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 26%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 0 0% 26%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --popover-foreground: 0 0% 26%;
+    --primary: 179 48% 57%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 179 63% 35%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 26%;
+    --accent: 179 48% 57%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 179 48% 57%;
     --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 }
 
@@ -79,4 +34,253 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #229799;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #48CFCB;
+}
+
+/* Custom Selection */
+::selection {
+  background: #48CFCB;
+  color: white;
+}
+
+/* Custom Focus */
+*:focus {
+  outline: 2px solid #48CFCB;
+  outline-offset: 2px;
+}
+
+/* Custom Link */
+a {
+  color: #229799;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #48CFCB;
+}
+
+/* Custom Button */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Custom Input */
+input, textarea, select {
+  border-color: #424242;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #48CFCB;
+}
+
+/* Custom Card */
+.card {
+  background: white;
+  border: 1px solid #424242;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 66, 66, 0.1);
+}
+
+/* Custom Badge */
+.badge {
+  background: #F5F5F5;
+  color: #424242;
+  border: 1px solid #424242;
+}
+
+.badge-primary {
+  background: #48CFCB;
+  color: white;
+}
+
+.badge-secondary {
+  background: #229799;
+  color: white;
+}
+
+/* Custom Table */
+table {
+  border-color: #424242;
+}
+
+th {
+  background: #F5F5F5;
+  color: #424242;
+}
+
+td {
+  border-color: #424242;
+}
+
+/* Custom Modal */
+.modal {
+  background: rgba(66, 66, 66, 0.5);
+}
+
+.modal-content {
+  background: white;
+  border: 1px solid #424242;
+}
+
+/* Custom Tooltip */
+.tooltip {
+  background: #424242;
+  color: white;
+}
+
+/* Custom Progress */
+progress {
+  background: #F5F5F5;
+}
+
+progress::-webkit-progress-bar {
+  background: #F5F5F5;
+}
+
+progress::-webkit-progress-value {
+  background: #48CFCB;
+}
+
+/* Custom Switch */
+.switch {
+  background: #F5F5F5;
+}
+
+.switch-checked {
+  background: #48CFCB;
+}
+
+/* Custom Radio and Checkbox */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: #48CFCB;
+}
+
+/* Custom Select */
+select {
+  background: white;
+  color: #424242;
+}
+
+select:focus {
+  border-color: #48CFCB;
+}
+
+/* Custom Range */
+input[type="range"] {
+  accent-color: #48CFCB;
+}
+
+/* Custom Code */
+code {
+  background: #F5F5F5;
+  color: #424242;
+}
+
+/* Custom Blockquote */
+blockquote {
+  border-left: 4px solid #48CFCB;
+  background: #F5F5F5;
+  color: #424242;
+}
+
+/* Custom HR */
+hr {
+  border-color: #424242;
+}
+
+/* Custom Mark */
+mark {
+  background: #48CFCB;
+  color: white;
+}
+
+/* Custom KBD */
+kbd {
+  background: #F5F5F5;
+  color: #424242;
+  border: 1px solid #424242;
+}
+
+/* Custom Details */
+details {
+  border: 1px solid #424242;
+}
+
+details summary {
+  background: #F5F5F5;
+  color: #424242;
+}
+
+/* Custom Dialog */
+dialog {
+  background: white;
+  border: 1px solid #424242;
+}
+
+dialog::backdrop {
+  background: rgba(66, 66, 66, 0.5);
+}
+
+/* Custom Meter */
+meter {
+  background: #F5F5F5;
+}
+
+meter::-webkit-meter-bar {
+  background: #F5F5F5;
+}
+
+meter::-webkit-meter-optimum-value {
+  background: #48CFCB;
+}
+
+meter::-webkit-meter-suboptimum-value {
+  background: #229799;
+}
+
+meter::-webkit-meter-even-less-good-value {
+  background: #424242;
 }
