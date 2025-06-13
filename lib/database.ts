@@ -2,21 +2,26 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/onesoul';
 
-// Extend the NodeJS global type
 declare global {
-  // Prevent re-declaration error for global in modules
-  // Use 'var' not 'let' or 'const' for global declarations
   var mongoose: {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
   } | undefined;
 }
 
-// Use globalThis instead of global (better compatibility)
-let cached = global.mongoose;
+// Safely initialize cached with fallback
+const globalWithMongoose = global as typeof globalThis & {
+  mongoose?: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
+};
+
+let cached = globalWithMongoose.mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = { conn: null, promise: null };
+  globalWithMongoose.mongoose = cached;
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
