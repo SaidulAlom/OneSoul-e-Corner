@@ -3,7 +3,12 @@ import { connectDB } from '@/lib/database';
 import { UserModel } from '@/models/User';
 import { getCurrentUser } from '@/lib/auth';
 
-export async function adminMiddleware(req: NextRequest) {
+type AdminHandler = (req: NextRequest, user: any) => Promise<NextResponse>;
+
+export async function adminMiddleware(
+  req: NextRequest,
+  handler: AdminHandler
+): Promise<NextResponse> {
   try {
     // Get current user from token
     const user = getCurrentUser(req);
@@ -35,11 +40,8 @@ export async function adminMiddleware(req: NextRequest) {
       );
     }
 
-    // Add user to request for use in the route handler
-    const request = req as any;
-    request.user = dbUser;
-
-    return NextResponse.next();
+    // Execute the handler with the authenticated user
+    return await handler(req, dbUser);
   } catch (error) {
     console.error('Admin middleware error:', error);
     return NextResponse.json(
