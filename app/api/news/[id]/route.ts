@@ -32,49 +32,45 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    // Check admin access
-    const adminCheck = await adminMiddleware(req);
-    if (adminCheck.status !== 200) {
-      return adminCheck;
+  return adminMiddleware(req, async (request, user) => {
+    try {
+      await connectDB();
+
+      const news = await NewsModel.findById(params.id);
+      
+      if (!news) {
+        return errorResponse('News not found', 404);
+      }
+
+      const body = await request.json();
+      const {
+        title,
+        content,
+        summary,
+        imageUrl,
+        category,
+        tags,
+        author,
+        status,
+      } = body;
+
+      // Update fields if provided
+      if (title) news.title = title;
+      if (content) news.content = content;
+      if (summary) news.summary = summary;
+      if (imageUrl) news.imageUrl = imageUrl;
+      if (category) news.category = category;
+      if (tags) news.tags = tags;
+      if (author) news.author = author;
+      if (status) news.status = status;
+
+      await news.save();
+
+      return successResponse(news);
+    } catch (error) {
+      return handleApiError(error);
     }
-
-    await connectDB();
-
-    const news = await NewsModel.findById(params.id);
-    
-    if (!news) {
-      return errorResponse('News not found', 404);
-    }
-
-    const body = await req.json();
-    const {
-      title,
-      content,
-      summary,
-      imageUrl,
-      category,
-      tags,
-      author,
-      status,
-    } = body;
-
-    // Update fields if provided
-    if (title) news.title = title;
-    if (content) news.content = content;
-    if (summary) news.summary = summary;
-    if (imageUrl) news.imageUrl = imageUrl;
-    if (category) news.category = category;
-    if (tags) news.tags = tags;
-    if (author) news.author = author;
-    if (status) news.status = status;
-
-    await news.save();
-
-    return successResponse(news);
-  } catch (error) {
-    return handleApiError(error);
-  }
+  });
 }
 
 // DELETE /api/news/[id] - Delete a news article
@@ -82,25 +78,21 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    // Check admin access
-    const adminCheck = await adminMiddleware(req);
-    if (adminCheck.status !== 200) {
-      return adminCheck;
+  return adminMiddleware(req, async (request, user) => {
+    try {
+      await connectDB();
+
+      const news = await NewsModel.findById(params.id);
+      
+      if (!news) {
+        return errorResponse('News not found', 404);
+      }
+
+      await news.deleteOne();
+
+      return successResponse({ message: 'News deleted successfully' });
+    } catch (error) {
+      return handleApiError(error);
     }
-
-    await connectDB();
-
-    const news = await NewsModel.findById(params.id);
-    
-    if (!news) {
-      return errorResponse('News not found', 404);
-    }
-
-    await news.deleteOne();
-
-    return successResponse({ message: 'News deleted successfully' });
-  } catch (error) {
-    return handleApiError(error);
-  }
+  });
 } 
