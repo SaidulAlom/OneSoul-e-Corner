@@ -1,17 +1,19 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { User } from './User';
 
 export interface News {
   title: string;
   content: string;
+  summary: string;
+  imageUrl: string;
   category: string;
-  image: string;
-  author: mongoose.Types.ObjectId;
   tags: string[];
-  views: number;
-  featured: boolean;
-  status: 'draft' | 'published';
+  author: string;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
+  status: 'draft' | 'published' | 'archived';
   publishedAt?: Date;
+  createdBy: mongoose.Types.ObjectId;
 }
 
 export interface NewsDocument extends News, Document {
@@ -23,46 +25,61 @@ const newsSchema = new Schema<NewsDocument>(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, 'Title is required'],
       trim: true,
     },
     content: {
       type: String,
-      required: true,
+      required: [true, 'Content is required'],
+      trim: true,
+    },
+    summary: {
+      type: String,
+      required: [true, 'Summary is required'],
+      trim: true,
+    },
+    imageUrl: {
+      type: String,
+      required: [true, 'Image URL is required'],
     },
     category: {
       type: String,
-      required: true,
+      required: [true, 'Category is required'],
       trim: true,
-    },
-    image: {
-      type: String,
-      required: true,
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
     },
     tags: [{
       type: String,
       trim: true,
     }],
-    views: {
+    author: {
+      type: String,
+      required: [true, 'Author is required'],
+      trim: true,
+    },
+    viewCount: {
       type: Number,
       default: 0,
     },
-    featured: {
-      type: Boolean,
-      default: false,
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
+    commentCount: {
+      type: Number,
+      default: 0,
     },
     status: {
       type: String,
-      enum: ['draft', 'published'],
+      enum: ['draft', 'published', 'archived'],
       default: 'draft',
     },
     publishedAt: {
       type: Date,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Creator is required'],
     },
   },
   {
@@ -70,16 +87,53 @@ const newsSchema = new Schema<NewsDocument>(
   }
 );
 
-// Index for search
-newsSchema.index({ title: 'text', content: 'text', tags: 'text' });
+// Indexes for better query performance
+newsSchema.index({ title: 'text', content: 'text', summary: 'text' });
+newsSchema.index({ category: 1 });
+newsSchema.index({ status: 1 });
+newsSchema.index({ createdBy: 1 });
+newsSchema.index({ tags: 1 });
 
-// Virtual for formatted date
-newsSchema.virtual('formattedDate').get(function() {
-  return this.publishedAt?.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+// Method to increment view count
+newsSchema.methods.incrementViewCount = async function() {
+  this.viewCount += 1;
+  return this.save();
+};
+
+// Method to increment like count
+newsSchema.methods.incrementLikeCount = async function() {
+  this.likeCount += 1;
+  return this.save();
+};
+
+// Method to decrement like count
+newsSchema.methods.decrementLikeCount = async function() {
+  if (this.likeCount > 0) {
+    this.likeCount -= 1;
+  }
+  return this.save();
+};
+
+// Method to increment comment count
+newsSchema.methods.incrementCommentCount = async function() {
+  this.commentCount += 1;
+  return this.save();
+};
+
+// Method to decrement comment count
+newsSchema.methods.decrementCommentCount = async function() {
+  if (this.commentCount > 0) {
+    this.commentCount -= 1;
+  }
+  return this.save();
+};
+
+// Pre-save middleware to handle publishedAt date
+newsSchema.pre('save', function(next) {
+  if (this.isModified('status') && this.status === 'published' && !this.publishedAt) {
+    this.publishedAt = new Date();
+  }
+  next();
 });
 
 export const NewsModel = mongoose.models.News || mongoose.model<NewsDocument>('News', newsSchema); 
