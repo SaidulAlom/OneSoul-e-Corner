@@ -61,7 +61,7 @@ const Header = () => {
             <Button
               variant="outline"
               size="sm"
-              className="text-[#F5F5F5] border-[#F5F5F5] hover:bg-[#48CFCB] hover:text-[#424242] hover:border-[#48CFCB] focus:ring-2 focus:ring-[#48CFCB] rounded-md md:hidden"
+              className="text-[#070707] border-[#F5F5F5] hover:bg-[#48CFCB] hover:text-[#424242] hover:border-[#48CFCB] focus:ring-2 focus:ring-[#48CFCB] rounded-md md:hidden"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
               {showMobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
