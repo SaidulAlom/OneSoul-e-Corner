@@ -2,25 +2,25 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/onesoul';
 
-declare global {
-  var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  } | undefined;
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
-// Safely initialize cached with fallback
+declare global {
+  var mongoose: MongooseCache | undefined;
+}
+
+// Initialize cached with proper type safety
 const globalWithMongoose = global as typeof globalThis & {
-  mongoose?: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  };
+  mongoose?: MongooseCache;
 };
 
-let cached = globalWithMongoose.mongoose;
+// Ensure cached is always defined with proper type
+const cached: MongooseCache = globalWithMongoose.mongoose || { conn: null, promise: null };
 
-if (!cached) {
-  cached = { conn: null, promise: null };
+// Update global cache if it doesn't exist
+if (!globalWithMongoose.mongoose) {
   globalWithMongoose.mongoose = cached;
 }
 
