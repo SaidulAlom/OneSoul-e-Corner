@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Users,
-  FileText,
-  Video,
-  BookOpen,
+import { 
+  Users, 
+  FileText, 
+  Video, 
+  BookOpen, 
   BarChart,
   Settings,
   LogOut,
@@ -89,24 +89,24 @@ export default function AdminPage() {
             >
               <Settings className="h-4 w-4 mr-2" />
               Settings
-            </Button>
-            <Button
-              variant="outline"
+                      </Button>
+                      <Button 
+                        variant="outline" 
               className="text-[#424242] hover:text-[#48CFCB]"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+                Logout
+              </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
-            <motion.div
+          <motion.div
               key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Card className="bg-white">
@@ -125,9 +125,9 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-[#424242]">{stat.value}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
           ))}
         </div>
 
@@ -149,7 +149,7 @@ export default function AdminPage() {
               <CardContent>
                 <div className="space-y-4">
                   {recentActivities.map((activity, index) => (
-                    <motion.div
+          <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -163,11 +163,11 @@ export default function AdminPage() {
                         <p className="text-sm text-[#424242]/80">
                           {activity.description}
                         </p>
-                      </div>
+                  </div>
                       <span className="text-sm text-[#424242]/60">
                         {activity.time}
                       </span>
-                    </motion.div>
+          </motion.div>
                   ))}
                 </div>
               </CardContent>
@@ -216,8 +216,8 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           </motion.div>
-        </div>
-      </div>
+                    </div>
+                  </div>
     </div>
   );
 } 
