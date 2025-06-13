@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/database';
-import User from '@/lib/models/User';
-import { comparePassword, generateToken } from '@/lib/auth';
+import { connectDB } from '@/lib/database';
+import { UserModel } from '@/models/User';
+import { generateToken } from '@/lib/jwt';
+import { LoginCredentials, ApiResponse, AuthResponse } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
-
-    const { email, password } = await request.json();
+    const body: LoginCredentials = await request.json();
+    const { email, password } = body;
 
     // Validate input
     if (!email || !password) {
@@ -17,8 +17,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Connect to database
+    await connectDB();
+
     // Find user
-    const user = await User.findOne({ email });
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials' },
@@ -26,9 +29,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check password
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
+    // Verify password
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials' },
         { status: 401 }
@@ -36,19 +39,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
-    const token = generateToken(user._id.toString(), user.role);
-
-    return NextResponse.json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+    const token = generateToken({
+      userId: user._id.toString(),
+      role: user.role,
     });
-  } catch (error) {
+
+    const response: ApiResponse<AuthResponse> = {
+      success: true,
+      data: {
+        user: user.toJSON(),
+        token,
+      },
+    };
+
+    return NextResponse.json(response);
+  } catch (error: any) {
     console.error('Login error:', error);
     return NextResponse.json(
       { success: false, error: 'Login failed' },

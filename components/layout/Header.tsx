@@ -28,7 +28,7 @@ const Header = () => {
       <div className="container mx-auto flex h-16 items-center px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between w-full">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#229799]">OneSoul</span>
+            <span className="text-2xl font-bold text-[#229799]">OneSoul e Corner</span>
           </Link>
           <nav className="hidden md:flex items-center justify-center gap-6 flex-1">
             {navigationItems.map((item) => (

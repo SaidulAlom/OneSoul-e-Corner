@@ -1,52 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/database';
-import User from '@/lib/models/User';
-import { hashPassword } from '@/lib/auth';
+import { connectDB } from '@/lib/database';
+import { UserModel } from '@/models/User';
+import { generateToken } from '@/lib/jwt';
+import { RegisterData, ApiResponse, AuthResponse } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
-
-    const { name, email, password } = await request.json();
+    const body: RegisterData = await request.json();
+    const { email, password, name } = body;
 
     // Validate input
-    if (!name || !email || !password) {
+    if (!email || !password || !name) {
       return NextResponse.json(
         { success: false, error: 'All fields are required' },
         { status: 400 }
       );
     }
 
+    // Connect to database
+    await connectDB();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: 'User already exists' },
+        { success: false, error: 'Email already registered' },
         { status: 400 }
       );
     }
 
-    // Hash password and create user
-    const hashedPassword = await hashPassword(password);
-    const user = new User({
-      name,
+    // Create new user
+    const user = await UserModel.create({
       email,
-      password: hashedPassword,
+      password,
+      name,
     });
 
-    await user.save();
+    // Generate token
+    const token = generateToken({
+      userId: user._id.toString(),
+      role: user.role,
+    });
 
-    return NextResponse.json({
+    const response: ApiResponse<AuthResponse> = {
       success: true,
-      message: 'User registered successfully',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+      data: {
+        user: user.toJSON(),
+        token,
       },
-    });
-  } catch (error) {
+    };
+
+    return NextResponse.json(response, { status: 201 });
+  } catch (error: any) {
     console.error('Registration error:', error);
     return NextResponse.json(
       { success: false, error: 'Registration failed' },

@@ -55,6 +55,7 @@
     "lucide-react": "^0.303.0",
     "mongoose": "^8.15.1",
     "next": "14.0.4",
+    "next-auth": "^4.24.11",
     "next-themes": "^0.2.1",
     "react": "^18",
     "react-day-picker": "^8.10.0",
@@ -72,7 +73,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.8",
-    "@types/jsonwebtoken": "^9.0.5",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
