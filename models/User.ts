@@ -2,9 +2,8 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
-// Define the user document interface
-export interface IUser {
-  _id: Types.ObjectId;
+// Define the base user interface without _id
+interface IUserBase {
   email: string;
   password: string;
   name: string;
@@ -13,9 +12,20 @@ export interface IUser {
   updatedAt: Date;
 }
 
-// Define the user document with methods
-export interface UserDocument extends Document, Omit<IUser, '_id'> {
+// Define the user document interface
+export interface IUser extends IUserBase {
   _id: Types.ObjectId;
+}
+
+// Define the user document with methods
+export interface UserDocument extends Document {
+  _id: Types.ObjectId;
+  email: string;
+  password: string;
+  name: string;
+  role: 'user' | 'admin';
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -25,7 +35,7 @@ export interface UserModel extends Model<UserDocument> {
 }
 
 // Define the schema
-const userSchema = new Schema<IUser, UserModel>({
+const userSchema = new Schema<IUserBase, UserModel>({
   email: {
     type: String,
     required: true,
