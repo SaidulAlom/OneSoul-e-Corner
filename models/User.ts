@@ -64,4 +64,7 @@ userSchema.methods.toJSON = function () {
 };
 
 export const UserModel =
-  mongoose.models.User || mongoose.model<UserDocument>('User', userSchema); 
+  mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
+
+// Export the User type for use in other models
+export type { User }; 

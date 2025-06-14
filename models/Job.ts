@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { User } from './User';
+import { UserModel } from './User';
 
 export interface Job {
   title: string;
