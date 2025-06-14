@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, Types } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types, HydratedDocument } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
@@ -18,14 +18,7 @@ export interface IUser extends IUserBase {
 }
 
 // Define the user document with methods
-export interface UserDocument extends Document {
-  _id: Types.ObjectId;
-  email: string;
-  password: string;
-  name: string;
-  role: 'user' | 'admin';
-  createdAt: Date;
-  updatedAt: Date;
+export interface UserDocument extends HydratedDocument<IUserBase> {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
