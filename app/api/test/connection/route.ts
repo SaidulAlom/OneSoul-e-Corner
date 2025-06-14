@@ -6,6 +6,10 @@ export async function GET(request: NextRequest) {
   try {
     const db = await connectDB();
     
+    if (!db.connection || !db.connection.db) {
+      throw new Error('Database connection not established');
+    }
+
     // Test database connection by getting server status
     const status = await db.connection.db.admin().serverStatus();
     
@@ -21,6 +25,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Database connection error:', error);
-    return errorResponse('Failed to connect to database', 500);
+    return errorResponse(
+      error instanceof Error ? error.message : 'Failed to connect to database',
+      500
+    );
   }
 } 

@@ -21,7 +21,7 @@ if (!global.mongoose) {
   global.mongoose = cached;
 }
 
-export async function connectDB() {
+export async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
@@ -41,6 +41,10 @@ export async function connectDB() {
   } catch (e) {
     cached.promise = null;
     throw e;
+  }
+
+  if (!cached.conn) {
+    throw new Error('Failed to establish database connection');
   }
 
   return cached.conn;
