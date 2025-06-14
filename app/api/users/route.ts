@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database';
-import { UserModel } from '@/models/User';
+import { UserModel, UserDocument } from '@/models/User';
 import { adminMiddleware } from '@/middleware/admin';
 import { successResponse, errorResponse, handleApiError, paginatedResponse } from '@/lib/api-utils';
+import { User } from '@/lib/types';
 
 // GET /api/users - List users with filtering and pagination
 export async function GET(request: NextRequest) {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       });
 
       // Remove password from response
-      const userResponse = newUser.toObject();
+      const userResponse = newUser.toObject() as User & { password?: string };
       delete userResponse.password;
 
       return successResponse(userResponse, 'User created successfully', 201);
