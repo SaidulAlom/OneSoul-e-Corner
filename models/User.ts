@@ -1,9 +1,10 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
 // Define the user document interface
 export interface IUser {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   name: string;

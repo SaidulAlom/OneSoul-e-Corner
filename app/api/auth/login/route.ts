@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // Find user
-    const user = await UserModel.findOne({ email }).exec() as UserDocument | null;
+    const user = await UserModel.findOne({ email }).exec();
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials' },
