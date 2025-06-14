@@ -14,7 +14,8 @@ export interface IUser {
 }
 
 // Define the user document with methods
-export interface UserDocument extends IUser, Document {
+export interface UserDocument extends Document, Omit<IUser, '_id'> {
+  _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
