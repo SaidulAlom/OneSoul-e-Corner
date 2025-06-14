@@ -43,6 +43,7 @@
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.2.2",
     "class-variance-authority": "^0.7.0",
+    "cloudinary": "^2.6.1",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "date-fns": "^3.0.6",
