@@ -2,14 +2,22 @@ import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
-// Omit _id from User type since Document already provides it
-type UserWithoutId = Omit<User, '_id'>;
+// Create a base interface for the document that includes all fields
+interface IUser {
+  email: string;
+  password: string;
+  name: string;
+  role: 'user' | 'admin';
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export interface UserDocument extends UserWithoutId, Document {
+// Extend the base interface with Document and add methods
+export interface UserDocument extends IUser, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<UserDocument>({
+const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,

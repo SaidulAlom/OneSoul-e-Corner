@@ -1,6 +1,7 @@
 import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
+// Base user interface without password
 export interface User {
   _id: string | mongoose.Types.ObjectId;
   email: string;
@@ -10,7 +11,9 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface UserWithPassword extends Omit<User, 'password'> {
+// User with password for internal use
+export interface UserWithPassword extends Omit<User, '_id'> {
+  _id?: string | mongoose.Types.ObjectId;
   password: string;
 }
 
