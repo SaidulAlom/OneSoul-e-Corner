@@ -1,9 +1,9 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
-// Create a base interface for the document that includes all fields
-interface IUser {
+// Define the user document interface
+export interface IUser {
   email: string;
   password: string;
   name: string;
@@ -12,12 +12,18 @@ interface IUser {
   updatedAt: Date;
 }
 
-// Extend the base interface with Document and add methods
+// Define the user document with methods
 export interface UserDocument extends IUser, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<IUser>({
+// Define the user model interface
+export interface UserModel extends Model<UserDocument> {
+  // Add any static methods here if needed
+}
+
+// Define the schema
+const userSchema = new Schema<IUser, UserModel>({
   email: {
     type: String,
     required: true,
@@ -79,8 +85,9 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-export const UserModel =
-  mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
+// Create and export the model
+export const UserModel = (mongoose.models.User as UserModel) || 
+  mongoose.model<UserDocument, UserModel>('User', userSchema);
 
 // Export the User type for use in other models
 export type { User }; 
