@@ -5,7 +5,8 @@
       "use": "@vercel/next",
       "config": {
         "installCommand": "npm install --prefer-offline --no-audit --no-fund --no-optional",
-        "buildCommand": "npm run build"
+        "buildCommand": "npm run build",
+        "maxLambdaSize": "50mb"
       }
     }
   ],
@@ -14,5 +15,11 @@
     "NPM_CONFIG_FETCH_RETRIES": "5",
     "NPM_CONFIG_FETCH_RETRY_MINTIMEOUT": "20000",
     "NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT": "120000"
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
   }
 } 
