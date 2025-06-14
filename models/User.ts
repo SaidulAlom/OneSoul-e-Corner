@@ -9,35 +9,40 @@ export interface UserDocument extends UserWithoutId, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<UserDocument>(
-  {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
-    },
+const userSchema = new Schema<UserDocument>({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
   },
-  {
-    timestamps: true,
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   }
-);
+}, {
+  timestamps: true,
+});
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

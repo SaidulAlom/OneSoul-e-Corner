@@ -10,7 +10,7 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface UserWithPassword extends User {
+export interface UserWithPassword extends Omit<User, 'password'> {
   password: string;
 }
 
