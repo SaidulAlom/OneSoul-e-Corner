@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database';
-import { UserModel } from '@/models/User';
+import { UserModel, UserDocument } from '@/models/User';
 import { generateToken } from '@/lib/jwt';
 import { LoginCredentials, ApiResponse, AuthResponse } from '@/lib/types';
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // Find user
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email }).exec() as UserDocument | null;
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Invalid credentials' },
