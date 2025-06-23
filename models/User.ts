@@ -1,8 +1,8 @@
-import mongoose, { Schema, Document, Model, Types, HydratedDocument } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { User, UserWithPassword } from '@/lib/types';
 
-// Define the base user interface without _id
+// Base user interface for schema/model generics
 interface IUserBase {
   email: string;
   password: string;
@@ -12,23 +12,13 @@ interface IUserBase {
   updatedAt: Date;
 }
 
-// Define the user document interface
-export interface IUser extends IUserBase {
-  _id: Types.ObjectId;
-}
-
-// Define the user document with methods
-export interface UserDocument extends HydratedDocument<IUserBase> {
+// For use in your code, not in the schema/model generics:
+export interface UserDocument extends IUserBase, mongoose.Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-// Define the user model interface
-export interface UserModel extends Model<UserDocument> {
-  // Add any static methods here if needed
-}
-
 // Define the schema
-const userSchema = new Schema<IUserBase, UserModel>({
+const userSchema = new Schema<IUserBase>({
   email: {
     type: String,
     required: true,
@@ -91,8 +81,7 @@ userSchema.methods.toJSON = function () {
 };
 
 // Create and export the model
-export const UserModel = (mongoose.models.User as UserModel) || 
-  mongoose.model<UserDocument, UserModel>('User', userSchema);
+export const UserModel = mongoose.models.User || mongoose.model<IUserBase>('User', userSchema);
 
 // Export the User type for use in other models
 export type { User }; 
