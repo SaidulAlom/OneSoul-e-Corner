@@ -35,13 +35,18 @@ const LoginPage = () => {
 
       const data = await response.json();
 
-      if (data.success) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+      if (data.success && data.data) {
+        const { token, user } = data.data;
+        if (!token || !user) {
+          toast.error('Invalid response from server.');
+          return;
+        }
+        // Persist for admin API usage
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
         toast.success('Login successful!');
-        
-        // Redirect based on user role
-        if (data.user.role === 'admin') {
+        // Redirect based on role
+        if (user.role === 'admin') {
           router.push('/admin');
         } else {
           router.push('/dashboard');

@@ -2,8 +2,9 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env');
+// Only throw error if we're not in a build environment
+if (!MONGODB_URI && process.env.NODE_ENV !== 'production') {
+  console.warn('MONGODB_URI environment variable is not set. Database operations will fail.');
 }
 
 interface MongooseCache {
@@ -22,6 +23,11 @@ if (!global.mongoose) {
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
+  // If no MONGODB_URI is set, throw a more descriptive error
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is not set. Please configure your database connection.');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }

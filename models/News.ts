@@ -1,139 +1,150 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface News {
+export interface INews extends Document {
   title: string;
   content: string;
-  summary: string;
-  imageUrl: string;
+  excerpt: string;
   category: string;
+  imageUrl?: string;
+  author: Types.ObjectId;
+  published: boolean;
+  featured: boolean;
   tags: string[];
-  author: string;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
-  status: 'draft' | 'published' | 'archived';
-  publishedAt?: Date;
-  createdBy: mongoose.Types.ObjectId;
-}
-
-export interface NewsDocument extends News, Document {
+  views: number;
+  likes: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const newsSchema = new Schema<NewsDocument>(
-  {
-    title: {
-      type: String,
-      required: [true, 'Title is required'],
-      trim: true,
-    },
-    content: {
-      type: String,
-      required: [true, 'Content is required'],
-      trim: true,
-    },
-    summary: {
-      type: String,
-      required: [true, 'Summary is required'],
-      trim: true,
-    },
-    imageUrl: {
-      type: String,
-      required: [true, 'Image URL is required'],
-    },
-    category: {
-      type: String,
-      required: [true, 'Category is required'],
-      trim: true,
-    },
-    tags: [{
-      type: String,
-      trim: true,
-    }],
-    author: {
-      type: String,
-      required: [true, 'Author is required'],
-      trim: true,
-    },
-    viewCount: {
-      type: Number,
-      default: 0,
-    },
-    likeCount: {
-      type: Number,
-      default: 0,
-    },
-    commentCount: {
-      type: Number,
-      default: 0,
-    },
-    status: {
-      type: String,
-      enum: ['draft', 'published', 'archived'],
-      default: 'draft',
-    },
-    publishedAt: {
-      type: Date,
-    },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Creator is required'],
-    },
+const newsSchema = new Schema<INews>({
+  title: {
+    type: String,
+    required: [true, 'Title is required'],
+    trim: true,
+    maxlength: [200, 'Title cannot be more than 200 characters']
   },
-  {
-    timestamps: true,
+  content: {
+    type: String,
+    required: [true, 'Content is required'],
+    minlength: [50, 'Content must be at least 50 characters']
+  },
+  excerpt: {
+    type: String,
+    required: [true, 'Excerpt is required'],
+    maxlength: [300, 'Excerpt cannot be more than 300 characters']
+  },
+  category: {
+    type: String,
+    required: [true, 'Category is required'],
+    enum: ['technology', 'business', 'politics', 'health', 'sports', 'entertainment', 'education', 'other']
+  },
+  imageUrl: {
+    type: String,
+    validate: {
+      validator: function(v: string) {
+        return !v || /^https?:\/\/.+/.test(v);
+      },
+      message: 'Image URL must be a valid URL'
+    }
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: [true, 'Author is required']
+  },
+  published: {
+    type: Boolean,
+    default: false
+  },
+  featured: {
+    type: Boolean,
+    default: false
+  },
+  tags: [{
+    type: String,
+    trim: true,
+    maxlength: [20, 'Tag cannot be more than 20 characters']
+  }],
+  views: {
+    type: Number,
+    min: [0, 'Views cannot be negative'],
+    default: 0
+  },
+  likes: {
+    type: Number,
+    min: [0, 'Likes cannot be negative'],
+    default: 0
   }
-);
+}, {
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    }
+  }
+});
 
 // Indexes for better query performance
-newsSchema.index({ title: 'text', content: 'text', summary: 'text' });
+newsSchema.index({ title: 'text', content: 'text', excerpt: 'text' });
 newsSchema.index({ category: 1 });
-newsSchema.index({ status: 1 });
-newsSchema.index({ createdBy: 1 });
-newsSchema.index({ tags: 1 });
+newsSchema.index({ author: 1 });
+newsSchema.index({ published: 1 });
+newsSchema.index({ featured: 1 });
+newsSchema.index({ createdAt: -1 });
+newsSchema.index({ views: -1 });
 
-// Method to increment view count
-newsSchema.methods.incrementViewCount = async function() {
-  this.viewCount += 1;
-  return this.save();
-};
+// Virtual for reading time estimation
+newsSchema.virtual('readingTime').get(function() {
+  const wordsPerMinute = 200;
+  const wordCount = this.content.split(' ').length;
+  return Math.ceil(wordCount / wordsPerMinute);
+});
 
-// Method to increment like count
-newsSchema.methods.incrementLikeCount = async function() {
-  this.likeCount += 1;
-  return this.save();
-};
-
-// Method to decrement like count
-newsSchema.methods.decrementLikeCount = async function() {
-  if (this.likeCount > 0) {
-    this.likeCount -= 1;
+// Virtual for formatted views
+newsSchema.virtual('formattedViews').get(function() {
+  if (this.views >= 1000000) {
+    return `${(this.views / 1000000).toFixed(1)}M`;
+  } else if (this.views >= 1000) {
+    return `${(this.views / 1000).toFixed(1)}K`;
   }
-  return this.save();
-};
+  return this.views.toString();
+});
 
-// Method to increment comment count
-newsSchema.methods.incrementCommentCount = async function() {
-  this.commentCount += 1;
-  return this.save();
-};
-
-// Method to decrement comment count
-newsSchema.methods.decrementCommentCount = async function() {
-  if (this.commentCount > 0) {
-    this.commentCount -= 1;
-  }
-  return this.save();
-};
-
-// Pre-save middleware to handle publishedAt date
+// Pre-save middleware to ensure tags are unique
 newsSchema.pre('save', function(next) {
-  if (this.isModified('status') && this.status === 'published' && !this.publishedAt) {
-    this.publishedAt = new Date();
+  if (this.tags) {
+    this.tags = [...new Set(this.tags)];
   }
   next();
 });
 
-export const NewsModel = mongoose.models.News || mongoose.model<NewsDocument>('News', newsSchema); 
+// Static method to find featured news
+newsSchema.statics.findFeatured = function() {
+  return this.find({ featured: true, published: true })
+    .populate('author', 'name email')
+    .sort({ createdAt: -1 });
+};
+
+// Static method to find news by category
+newsSchema.statics.findByCategory = function(category: string) {
+  return this.find({ category, published: true })
+    .populate('author', 'name email')
+    .sort({ createdAt: -1 });
+};
+
+// Instance method to increment views
+newsSchema.methods.incrementViews = function() {
+  this.views += 1;
+  return this.save();
+};
+
+// Instance method to toggle like
+newsSchema.methods.toggleLike = function() {
+  this.likes += 1;
+  return this.save();
+};
+
+export const NewsModel = mongoose.models.News || mongoose.model<INews>('News', newsSchema); 

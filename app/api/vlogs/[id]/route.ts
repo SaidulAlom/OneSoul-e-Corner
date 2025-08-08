@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database';
 import { VlogModel } from '@/models/Vlog';
-import { adminMiddleware } from '@/middleware/admin';
-import { successResponse, errorResponse, handleApiError } from '@/lib/api-utils';
+import { adminMiddleware } from '@/lib/auth';
+import { successResponse, errorResponse, handleApiError, validateId } from '@/lib/api-utils';
 
 // GET /api/vlogs/[id] - Get a single vlog and increment views
 export async function GET(
@@ -10,15 +10,22 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Validate ID format
+    if (!validateId(params.id)) {
+      return errorResponse('Invalid vlog ID format', 400);
+    }
+
     await connectDB();
     const vlog = await VlogModel.findByIdAndUpdate(
       params.id,
       { $inc: { views: 1 } },
       { new: true }
     ).populate('author', 'name email');
+
     if (!vlog) {
       return errorResponse('Vlog not found', 404);
     }
+
     return successResponse(vlog);
   } catch (error) {
     return handleApiError(error);
@@ -32,16 +39,37 @@ export async function PUT(
 ) {
   return adminMiddleware(request, async (req, user) => {
     try {
+      // Validate ID format
+      if (!validateId(params.id)) {
+        return errorResponse('Invalid vlog ID format', 400);
+      }
+
       await connectDB();
       const body = await request.json();
+      
+      // Sanitize and validate input
+      const updateData = {
+        title: body.title?.trim(),
+        description: body.description?.trim(),
+        videoUrl: body.videoUrl?.trim(),
+        thumbnailUrl: body.thumbnailUrl?.trim(),
+        category: body.category,
+        tags: body.tags?.filter((tag: string) => tag.trim()),
+        duration: body.duration,
+        featured: body.featured,
+        published: body.published
+      };
+
       const vlog = await VlogModel.findByIdAndUpdate(
         params.id,
-        { ...body },
-        { new: true }
-      );
+        updateData,
+        { new: true, runValidators: true }
+      ).populate('author', 'name email');
+
       if (!vlog) {
         return errorResponse('Vlog not found', 404);
       }
+
       return successResponse(vlog, 'Vlog updated successfully');
     } catch (error) {
       return handleApiError(error);
@@ -56,11 +84,18 @@ export async function DELETE(
 ) {
   return adminMiddleware(request, async (req, user) => {
     try {
+      // Validate ID format
+      if (!validateId(params.id)) {
+        return errorResponse('Invalid vlog ID format', 400);
+      }
+
       await connectDB();
       const vlog = await VlogModel.findByIdAndDelete(params.id);
+      
       if (!vlog) {
         return errorResponse('Vlog not found', 404);
       }
+
       return successResponse(null, 'Vlog deleted successfully');
     } catch (error) {
       return handleApiError(error);
